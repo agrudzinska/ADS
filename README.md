@@ -1,6 +1,6 @@
 # ADS
-Advanced Database Systems SQL
-
+Advanced Database Systems SQL  
+  
 
 * Database Systems Concepts
 A. Silberschatz, H. Korth and S. Sudarshan (2013)
