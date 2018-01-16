@@ -1,3 +1,5 @@
+connect system/oraclexe
+
 CREATE TABLE people (
 name VARCHAR2(30),
 phone VARCHAR2(20) );
