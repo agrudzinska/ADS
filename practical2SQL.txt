@@ -1,0 +1,20 @@
+CREATE TABLE people (
+name VARCHAR2(30),
+phone VARCHAR2(20) );
+
+CREATE TYPE person AS OBJECT (
+name VARCHAR2(30),
+phone VARCHAR2(20) );
+/
+
+CREATE TABLE person_table OF person;
+
+CREATE TYPE street AS OBJECT (
+snumber NUMBER,
+sname VARCHAR2(30) );
+/
+CREATE TYPE address AS OBJECT (
+street_and_number street,
+city VARCHAR2(30),
+postal_code VARCHAR2(8));
+/
