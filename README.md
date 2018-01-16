@@ -1,8 +1,6 @@
 # ADS
 Advanced Database Systems SQL
-
-
-
+/n
 
 * Database Systems Concepts
 A. Silberschatz, H. Korth and S. Sudarshan (2013)
