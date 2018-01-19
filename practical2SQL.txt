@@ -1,22 +1,128 @@
 connect system/oraclexe
 
-CREATE TABLE people (
-name VARCHAR2(30),
-phone VARCHAR2(20) );
+show errors
+
+select * from user_types;
+
+drop table peopleTable;
+
+CREATE TYPE street AS OBJECT (
+snumber NUMBER,
+flatnumber NUMBER,
+sname VARCHAR2(30));
+/
+
+CREATE TYPE address AS OBJECT (
+street_and_number street,
+city VARCHAR2(30),
+postal_code VARCHAR2(8),
+country VARCHAR2(20));
+/
+
+CREATE TYPE name AS OBJECT (
+firstname VARCHAR2(20),
+midinitial VARCHAR2(1),
+surname VARCHAR2(30));
+/
+
+CREATE TYPE phone AS OBJECT (
+business NUMBER,
+home NUMBER,
+mobile NUMBER);
+/
 
 CREATE TYPE person AS OBJECT (
-name VARCHAR2(30),
-phone VARCHAR2(20) );
+pname name,
+pphone phone,
+paddress address,
+gender VARCHAR2(10)
+);
+/
+
+ALTER TYPE person NOT FINAL;
+
+CREATE TYPE employee UNDER person
+(emp_ID INTEGER)
+NOT FINAL
+/
+
+CREATE TYPE job AS OBJECT (
+jobtitle VARCHAR2(20),
+job_ID INT,
+salary_amount INT,
+years_experience INT
+)
+NOT FINAL
 /
 
 CREATE TABLE person_table OF person;
 
-CREATE TYPE street AS OBJECT (
-snumber NUMBER,
-sname VARCHAR2(30) );
-/
-CREATE TYPE address AS OBJECT (
-street_and_number street,
-city VARCHAR2(30),
-postal_code VARCHAR2(8));
-/
+CREATE TABLE employee_table OF employee;
+
+ALTER TABLE employee_table 
+	ADD(CONSTRAINT empID PRIMARY KEY(emp_ID));
+
+CREATE TABLE job_table OF job;
+
+ALTER TABLE job_table 
+	ADD(CONSTRAINT jobID PRIMARY KEY(job_ID));
+
+INSERT INTO person_table
+values (name('Ada', 'A', 'Grudzinska'),
+phone('123', '456', '789'),
+address(street('11', '7', 'Montpelier'), 'Edinburgh', 'EH1 11A', 'UK'),
+'female');
+
+CREATE TABLE peopleTable (
+pname name,
+paddress address
+);
+
+INSERT INTO peopleTable
+values
+(name('Ada', 'Grudzinska'),
+address(street('11', '7', 'Montpelier'), 'Edinburgh', 'EH1 11A', 'UK'));
+
+INSERT INTO peopleTable
+values
+(name('John', 'Smith'),
+address(street('1', '1', 'Merchiston'), 'Edinburgh', 'EH1 11B', 'UK'));
+
+INSERT INTO peopleTable
+values
+(name('Ben', 'Smith'),
+address(street('2', '2', 'Merchiston'), 'Edinburgh', 'EH1 11C', 'UK'));
+
+INSERT INTO peopleTable
+values
+(name('Adam', 'Jones'),
+address(street('1', '3', 'Montpelier'), 'Edinburgh', 'EH1 13A', 'UK'));
+
+INSERT INTO peopleTable
+values
+(name('Adam', 'Cook'),
+address(street('1', '1', 'Polska'), 'Bialystok', 'PL2 13A', 'Poland'));
+
+INSERT INTO peopleTable (name, address)
+values ('Adam', 'Cook', street('1', '1', 'Polska', 'Bialystok'), 'PL2 13A', 'Poland'),
+(name('Adam', 'Jones'),
+address(street('1', '3', 'Montpelier'), 'Edinburgh', 'EH1 13A', 'UK')),
+(name('Ben', 'Smith'),
+address(street('2', '2', 'Merchiston'), 'Edinburgh', 'EH1 11C', 'UK')),
+(name('John', 'Smith'),
+address(street('1', '1', 'Merchiston'), 'Edinburgh', 'EH1 11B', 'UK')),
+(name('Ada', 'Grudzinska'),
+address(street('11', '7', 'Montpelier'), 'Edinburgh', 'EH1 11A', 'UK'));
+
+SELECT * FROM peopleTable;
+
+SELECT p.paddress.street_and_number
+from peopleTable p
+where p.pname.firstname = 'Adam';
+
+
+
+
+
+
+
