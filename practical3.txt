@@ -1,0 +1,31 @@
+select * from user_types;
+
+ALTER TYPE person NOT FINAL cascade;
+
+drop type employee;
+
+CREATE TYPE employee UNDER person
+(emp_ID INTEGER)
+NOT FINAL
+/
+
+CREATE TYPE job AS OBJECT (
+jobtitle VARCHAR2(20),
+job_ID INT,
+salary_amount INT,
+years_experience INT
+)
+NOT FINAL
+/
+
+CREATE TABLE employee_table OF employee;
+CREATE TABLE job_table OF job;
+
+create table employment_table(
+employee ref employee scope is employee_table,
+position ref job scope is job_table);
+
+INSERT INTO job_table
+values
+('Engineer', 1, 1000, 3);
+
