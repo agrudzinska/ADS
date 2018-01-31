@@ -29,3 +29,26 @@ INSERT INTO job_table
 values
 ('Engineer', 1, 1000, 3);
 
+desc employee;
+
+INSERT INTO employee_table
+values ('Ada', '1234', 1);
+
+insert into employment_table
+select ref(e), ref(j)
+from job_table j, employee_table e
+where e.emp_ID = 1
+and j.job_ID = 1;
+
+select * from EMPLOYMENT_TABLE;
+
+select value(j)
+from job_table j
+where jobtitle = 'Engineer';
+
+select * 
+from job_table 
+where jobtitle = 'Engineer';
+
+select DEREF(p.employee)
+from employment_table p;
