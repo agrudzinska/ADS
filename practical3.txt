@@ -1,5 +1,10 @@
 select * from user_types;
 
+CREATE TYPE person AS OBJECT (
+name VARCHAR2(20),
+surname VARCHAR2(20)
+);
+
 ALTER TYPE person NOT FINAL cascade;
 
 drop type employee;
@@ -18,6 +23,13 @@ years_experience INT
 NOT FINAL
 /
 
+desc employee;
+
+create type employment as object(
+employee_r ref employee,
+position ref job);
+/
+
 CREATE TABLE employee_table OF employee;
 CREATE TABLE job_table OF job;
 
@@ -29,10 +41,33 @@ INSERT INTO job_table
 values
 ('Engineer', 1, 1000, 3);
 
-desc employee;
+INSERT INTO job_table
+values
+('Manager', 2, 5000, 2);
+
+INSERT INTO job_table
+values
+('Designer', 3, 2000, 3);
+
+INSERT INTO job_table
+values
+('Developer', 4, 1000, 1);
+
 
 INSERT INTO employee_table
 values ('Ada', '1234', 1);
+
+INSERT INTO employee_table
+values ('Adam', '5678', 2);
+
+INSERT INTO employee_table
+values ('John', '9012', 3);
+
+INSERT INTO employee_table
+values ('Jack', '3456', 4);
+
+INSERT INTO employee_table
+values ('Amy', '7890', 5);
 
 insert into employment_table
 select ref(e), ref(j)
@@ -40,7 +75,35 @@ from job_table j, employee_table e
 where e.emp_ID = 1
 and j.job_ID = 1;
 
+insert into employment_table
+select ref(e), ref(j)
+from job_table j, employee_table e
+where e.emp_ID = 2
+and j.job_ID = 2;
+
+insert into employment_table
+select ref(e), ref(j)
+from job_table j, employee_table e
+where e.emp_ID = 3
+and j.job_ID = 3;
+
+insert into employment_table
+select ref(e), ref(j)
+from job_table j, employee_table e
+where e.emp_ID = 4
+and j.job_ID = 4;
+
+insert into employment_table
+select ref(e), ref(j)
+from job_table j, employee_table e
+where e.emp_ID = 5
+and j.job_ID = 1;
+
 select * from EMPLOYMENT_TABLE;
+
+select deref(e.EMPLOYEE), deref(e.POSITION)  from employment_table e;
+
+select value(e.EMPLOYEE), value(e.POSITION)  from employment_table e;
 
 select value(j)
 from job_table j
