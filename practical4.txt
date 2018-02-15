@@ -1,0 +1,85 @@
+create type student under person
+(sid varchar2(10),
+degree varchar2(20),
+programme varchar2(20));
+/
+
+create table student_table of student (
+sid primary key);
+
+desc student_table;
+
+create type teacher under person
+( tid varchar2(10),
+salary integer,
+position varchar2(20),
+insurance_no varchar2(20));
+/
+
+create table teacher_table of teacher (
+tid primary key,
+constraint insurance_no_const unique (insurance_no),
+constraint position_const check (position IN
+('Lecturer', 'Senior Lecturer', 'Professor')));
+
+create type phone_array as varray(10) of varchar2(12);
+/
+
+create table company1(
+name varchar2(20),
+phone phone_array
+);
+
+insert into company1
+values(
+'ada', phone_array('1234', '5678')
+);
+
+insert into company1
+values(
+'gada', phone_array('21234', '25678')
+);
+
+create type phone_nested as table of varchar2(12);
+/
+
+create table company2(
+name varchar2(20),
+phone phone_nested
+)
+nested table phone store as phone_nested_table;
+
+insert into company2
+values(
+'adaaa', phone_nested('123', '456', '789')
+);
+
+create type phone_code as object(
+area_code varchar2(10),
+local_number varchar2(10)
+);
+/
+
+create type phone_numbers as table of phone_code;
+/
+
+create table company3(
+name varchar2(20),
+phone phone_numbers
+)
+nested table phone store as phone_nt_table;
+
+insert into company3 
+values(
+'adanska', phone_numbers(phone_code('111','222'))
+);
+
+insert into company3 
+values(
+'adanska', phone_numbers(phone_code('123','456'))
+);
+
+insert into company3 
+values(
+'ada', phone_numbers(phone_code('123','456'), phone_code('789', '123'))
+);
