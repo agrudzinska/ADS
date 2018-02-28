@@ -1,0 +1,35 @@
+drop type name;
+drop type address;
+drop type mobileNumber_nested;
+drop type phoneNumber;
+
+
+CREATE TYPE name AS OBJECT (
+	title VARCHAR2(10),
+	firstname VARCHAR2(30),
+	surname VARCHAR2(30)
+);
+/
+
+CREATE TYPE address AS OBJECT (
+	street VARCHAR2(30),
+	city VARCHAR2(20),
+	postcode VARCHAR2(8)
+);
+/
+
+--using a nested table as there is no specified maximum number of allowed mobile phone numbers
+
+--ASK TAOXIN ABOUT NESTED TABLE INSIDE OF A TYPE!!!!!!!!
+
+CREATE TYPE mobileNumber_nested AS TABLE OF VARCHAR2(12);
+/
+
+CREATE TYPE phoneNumber AS OBJECT (
+	home VARCHAR2(12),
+	mobile mobileNumber_nested
+);
+nested table mobile store as mobile_nested_table;
+/
+
+
