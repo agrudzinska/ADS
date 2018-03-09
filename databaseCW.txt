@@ -1,7 +1,10 @@
+drop type person;
+drop type branch;
 drop type name;
 drop type address;
-drop type mobileNumber_nested;
 drop type phoneNumber;
+drop type phone_array;
+
 
 
 CREATE TYPE name AS OBJECT (
@@ -18,18 +21,33 @@ CREATE TYPE address AS OBJECT (
 );
 /
 
---using a nested table as there is no specified maximum number of allowed mobile phone numbers
+--using a VARRAY with a specified max number of mobile numbers (10), unable to change after implementing
 
---ASK TAOXIN ABOUT NESTED TABLE INSIDE OF A TYPE!!!!!!!!
-
-CREATE TYPE mobileNumber_nested AS TABLE OF VARCHAR2(12);
+CREATE TYPE phone_array as varray(10) of VARCHAR2(12);
 /
 
 CREATE TYPE phoneNumber AS OBJECT (
 	home VARCHAR2(12),
-	mobile mobileNumber_nested
+	mobile phone_array
 );
-nested table mobile store as mobile_nested_table;
 /
+
+CREATE TYPE person AS OBJECT (
+	pname name,
+	paddress address,
+	pnumber phoneNumber,
+	niNum VARCHAR2(10)
+);
+/
+
+CREATE TYPE branch AS OBJECT (
+	branchID INT,
+	baddress address,
+	phoneNumber VARCHAR2(12)
+);
+/
+
+
+
 
 
