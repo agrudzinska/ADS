@@ -71,7 +71,7 @@ CREATE TABLE branchTable OF branch (
 );
 
 CREATE TYPE account AS OBJECT (
-	accNum INT,
+	accID INT,
 	accType VARCHAR2(10),
 	balance INT,
 	intRate INT,
@@ -103,4 +103,29 @@ CREATE TYPE customer UNDER person (
 
 CREATE TABLE customerTable OF customer
 nested table mobileNumber store as phone_cust_table;
+
+CREATE TYPE customerAccount AS OBJECT (
+	custID REF customer,
+	accID REF account
+);
+/
+
+CREATE TABLE customerAccountTable OF customerAccount;
+
+INSERT INTO branchTable
+VALUES (
+	'1', address('11 Montpelier', 'Edinburgh', 'EH10 4LZ'), '123456'
+);
+
+INSERT INTO branchTable
+VALUES (
+	'2', address('43 Comely Bank', 'Edinburgh', 'EH4 1AF'), '01314568501'
+);
+
+INSERT INTO accountTable
+(
+	select 1, 'current', 10000, 0.02, 500, '01-01-17', ref(b) 
+		from branchTable b
+	where b.branchID = 1
+);
 
