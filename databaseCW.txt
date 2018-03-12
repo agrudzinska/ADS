@@ -1,11 +1,17 @@
+drop table customerTable;
+drop table employeeTable;
+drop table accountTable;
+drop table branchTable;
+drop type employee;
+drop type customer;
 drop type person;
+drop type account;
 drop type branch;
 drop type name;
 drop type address;
 drop type phoneNumber;
+drop type phone_nested;
 drop type phone_array;
-
-
 
 CREATE TYPE name AS OBJECT (
 	title VARCHAR2(10),
@@ -26,9 +32,12 @@ CREATE TYPE address AS OBJECT (
 CREATE TYPE phone_array as varray(10) of VARCHAR2(12);
 /
 
+CREATE TYPE phone_nested as table of VARCHAR2(12);
+/
+
 CREATE TYPE phoneNumber AS OBJECT (
 	home VARCHAR2(12),
-	mobile phone_array
+	mobile phone_nested
 );
 /
 
@@ -40,6 +49,16 @@ CREATE TYPE person AS OBJECT (
 );
 /
 
+CREATE TYPE person AS OBJECT (
+	pname name,
+	paddress address,
+	homeNumber VARCHAR2(12),
+	mobileNumber phone_nested,
+	niNum VARCHAR2(10)
+)
+not final;
+/
+
 CREATE TYPE branch AS OBJECT (
 	branchID INT,
 	baddress address,
@@ -47,7 +66,41 @@ CREATE TYPE branch AS OBJECT (
 );
 /
 
+CREATE TABLE branchTable OF branch (
+	constraint branchID_const unique (branchID)
+);
 
+CREATE TYPE account AS OBJECT (
+	accNum INT,
+	accType VARCHAR2(10),
+	balance INT,
+	intRate INT,
+	limitOfFreeOD INT,
+	openDate DATE,
+	branchID REF branch
+);
+/
 
+CREATE TABLE accountTable OF account;
 
+CREATE TYPE employee UNDER person (
+	empID INT,
+	salary INT,
+	position VARCHAR2(10),
+	joinDate DATE,
+	branchID REF branch,
+	supervisor REF employee
+);
+/
+
+CREATE TABLE employeeTable OF employee
+nested table mobileNumber store as phone_emp_table;
+
+CREATE TYPE customer UNDER person (
+	custID INT
+);
+/
+
+CREATE TABLE customerTable OF customer
+nested table mobileNumber store as phone_cust_table;
 
