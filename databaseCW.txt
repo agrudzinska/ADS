@@ -1,7 +1,11 @@
+--QUESTION 6
+drop table customerAccountTable;
 drop table customerTable;
 drop table employeeTable;
 drop table accountTable;
 drop table branchTable;
+drop type customerAccount;
+drop type ref_cust_acc;
 drop type employee;
 drop type customer;
 drop type person;
@@ -13,6 +17,8 @@ drop type phoneNumber;
 drop type phone_nested;
 drop type phone_array;
 
+
+--QUESTION 2
 CREATE TYPE name AS OBJECT (
 	title VARCHAR2(10),
 	firstname VARCHAR2(30),
@@ -44,14 +50,6 @@ CREATE TYPE phoneNumber AS OBJECT (
 CREATE TYPE person AS OBJECT (
 	pname name,
 	paddress address,
-	pnumber phoneNumber,
-	niNum VARCHAR2(10)
-);
-/
-
-CREATE TYPE person AS OBJECT (
-	pname name,
-	paddress address,
 	homeNumber VARCHAR2(12),
 	mobileNumber phone_nested,
 	niNum VARCHAR2(10)
@@ -74,26 +72,32 @@ CREATE TYPE account AS OBJECT (
 	accID INT,
 	accType VARCHAR2(10),
 	balance INT,
-	intRate INT,
+	intRate FLOAT,
 	limitOfFreeOD INT,
 	openDate DATE,
 	branchID REF branch
 );
 /
 
-CREATE TABLE accountTable OF account;
+CREATE TABLE accountTable OF account (
+	constraint accID_const unique(accID),
+	constraint accType_const check (accType in ('current', 'savings'))
+);
 
 CREATE TYPE employee UNDER person (
 	empID INT,
 	salary INT,
-	position VARCHAR2(10),
+	position VARCHAR2(15),
 	joinDate DATE,
 	branchID REF branch,
 	supervisor REF employee
 );
 /
 
-CREATE TABLE employeeTable OF employee
+CREATE TABLE employeeTable OF employee (
+	constraint empID_const unique(empID),
+	constraint position_const check (position in ('Head', 'Manager', 'Project Leader', 'Accountant', 'Cashier'))
+)
 nested table mobileNumber store as phone_emp_table;
 
 CREATE TYPE customer UNDER person (
@@ -101,25 +105,52 @@ CREATE TYPE customer UNDER person (
 );
 /
 
-CREATE TABLE customerTable OF customer
+CREATE TABLE customerTable OF customer (
+	constraint custID_const unique(custID)
+)
 nested table mobileNumber store as phone_cust_table;
 
+CREATE TYPE ref_cust_acc as table of REF customer;
+/
+
 CREATE TYPE customerAccount AS OBJECT (
-	custID REF customer,
+	custID ref_cust_acc,
 	accID REF account
 );
 /
 
-CREATE TABLE customerAccountTable OF customerAccount;
+CREATE TABLE customerAccountTable OF customerAccount
+nested table custID store as ref_cust_acc_table;
 
 INSERT INTO branchTable
 VALUES (
-	'1', address('11 Montpelier', 'Edinburgh', 'EH10 4LZ'), '123456'
+	1, address('1 Montpelier', 'Edinburgh', 'EH11 4LZ'), '01311238501'
 );
 
 INSERT INTO branchTable
 VALUES (
-	'2', address('43 Comely Bank', 'Edinburgh', 'EH4 1AF'), '01314568501'
+	2, address('50 Comely Bank', 'Edinburgh', 'EH4 1AF'), '01314568501'
+);
+
+INSERT INTO employeeTable (pname, paddress, homeNumber, mobileNumber, niNum, empID, salary, position, joinDate, branchID)
+(
+	select name('Mrs', 'Joanna', 'Scott'), address('1 Edinburgh Road', 'Edinburgh', 'EH13 1AR'), '01314032301', phone_nested('07599445123'), 'QQ123456D', 1, 30000, 'Head', '01-01-16', ref(b)
+		from branchTable b
+	where b.branchID = 1
+);
+
+INSERT INTO employeeTable (pname, paddress, homeNumber, mobileNumber, niNum, empID, salary, position, joinDate, branchID, supervisor)
+(
+	select name('Mr', 'Christian', 'Jones'), address('5 Edinburgh Road', 'Edinburgh', 'EH15 1AR'), '01314032001', phone_nested('07599945123'), 'QQ123456E', 2, 40000, 'Project Leader', '01-03-16', ref(b), ref(e)
+		from branchTable b, employeeTable e
+	where b.branchID = 1 and e.empID = 1
+);
+
+INSERT INTO employeeTable (pname, paddress, homeNumber, mobileNumber, niNum, empID, salary, position, joinDate, branchID, supervisor)
+(
+	select name('Miss', 'Monica', 'Holmes'), address('6 Edinburgh Road', 'Edinburgh', 'EH16 1AR'), '01314032006', phone_nested('07599945163', '07596645163'), 'QQ123656E', 3, 30000, 'Cashier', '01-04-16', ref(b), ref(e)
+		from branchTable b, employeeTable e
+	where b.branchID = 1 and e.empID = 2
 );
 
 INSERT INTO accountTable
@@ -128,4 +159,79 @@ INSERT INTO accountTable
 		from branchTable b
 	where b.branchID = 1
 );
+
+INSERT INTO accountTable(accID, accType, balance, intRate, openDate, branchID)
+(
+	select 2, 'savings', 10000, 1.2, '01-02-17', ref(b) 
+		from branchTable b
+	where b.branchID = 1
+);
+
+INSERT INTO accountTable(accID, accType, balance, intRate, openDate, branchID)
+(
+	select 3, 'savings', 10000, 0.8,  '01-03-17', ref(b) 
+		from branchTable b
+	where b.branchID = 2
+);
+
+INSERT INTO accountTable(accID, accType, balance, intRate, openDate, branchID)
+(
+	select 4, 'savings', 13000, 0.5, '04-01-17', ref(b) 
+		from branchTable b
+	where b.branchID = 2
+);
+
+INSERT INTO customerTable
+VALUES (
+	name('Mr', 'John', 'Smith'), address('2 Colinton Road', 'Edinburgh', 'EH11 1AR'), '01314512301', phone_nested('07599445619', '07699093876'), 'QQ123456C', 1
+);
+
+INSERT INTO customerTable
+VALUES (
+	name('Mr', 'Adam', 'Horns'), address('8 Colinton Road', 'Edinburgh', 'EH11 9OP'), '01332112301', phone_nested('07599445439', '07623453876'), 'QQ123986C', 2
+);
+
+
+INSERT INTO customerAccountTable
+(
+	select ref_cust_acc(ref(c)), ref(a)
+		from customerTable c, accountTable a
+	where (c.custID = 1 and a.accID = 1)
+);
+
+INSERT INTO customerAccountTable
+(
+	select ref_cust_acc(ref(c), ref(c2)), ref(a)
+		from customerTable c, customerTable c2, accountTable a
+	where (((c.custID = 1 or c.custID = 2) and a.accID = 2) or 
+		(a.accID = 2 and (c2.custID = 1 OR c2.custID = 2))) 
+);
+
+select c.custID, deref(c.accID) from customerAccountTable c;
+
+select pname, paddress, homeNumber, mobileNumber, niNum, empID, salary, position, joinDate, deref(e.branchID), deref(e.supervisor)
+from employeeTable e;
+
+
+--QUESTION 4.a
+select e.pname.title as "Title", 
+	e.pname.firstname as "First name", 
+	e.pname.surname as "Surname" 
+from employeetable e 
+where e.pname.firstname LIKE '%on%' 
+	and e.paddress.city = 'Edinburgh';
+
+--QUESTION 4.b
+select count(a.accID) as "Number of accounts", 
+	a.branchID.baddress.street as "Street", 
+	a.branchID.baddress.city as "City", 
+	a.branchID.baddress.postcode as "Postcode"
+from accountTable a 
+where a.accType = 'savings' 
+	group by(a.branchID);
+
+--QUESTION 4.c
+
+
+
 
